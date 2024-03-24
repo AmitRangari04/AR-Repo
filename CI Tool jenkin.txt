@@ -1,0 +1,194 @@
+
+Jenkins Walkthrough
+===================
+
+Pre-Requisites
+--------------
+
+1. Make sure min Java 11 JDK is installed on server.
+You can download from below link
+https://www.oracle.com/java/technologies/downloads/#jdk20-windows
+
+2. Verify java -version
+3. Create repo in Github 
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Installation of Jenkins on Local Server
+--------------------------------------
+
+1. Go to Jenkins download page and download the jenkins.war
+2. https://www.jenkins.io/download/
+3. Run below command to installed
+
+java -jar jenkins.war --httpPort=9090        (Port is optional, default port 8080)
+
+4. When you see, Jenkins is fully up and running means - Setup is done successfully.
+5. Access URL by 
+http://localhost:9090
+
+6. Note down the password printed on console output during jenkins startup and enter on URL to proceed
+
+7. Click on install suggested plugin box. It takes few minutes to setup all the required plugins
+
+8. Once done, on next screen, enter username, password, full name etc -> Save and continue
+
+9. Click on save and finish -> Start using jenkins
+
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Walkthrough - Jenkins Console
+-----------------------------
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Creating Simple FreeStyle Job
+------------------------------
+
+1. Login to Jenkins
+2. Click on New Item -> Enter name e.g. FirstJob
+3. Click on FreeStyle Project -> Ok -> save
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Configuring GitHub with Jenkins
+-------------------------------
+
+1. Goto Dashboard -> Manage Jenkins -> Manage Credentials -> System -> Global Credentials
+2. Enter below details
+
+kind - Username and password
+Scope - Global
+Username - GitHub username
+Password - GitHub password
+ID - Github
+
+3. Go To Dashboard, select FirstJob -> Configure
+4. Go to source Code Management
+5. Select Git and enter details like repository URL and select credentials
+6. Branch - */main
+7. Save and Click on Build now.
+8. Verify - It should be successful.
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Integrating multiple Jobs
+---------------------------
+
+1. Create another job as per above steps e.g. SecondJob
+2. During creation, Go to Post Build actions section -> Build other projects
+3. Select FirstJob
+4. apply -> save
+5. Run SecondJob and see FirstJob is also getting executed
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Adding Build Steps in Job
+-------------------------
+
+1. Select SecondJob -> Configure -> Add Build Steps -> Execute Shell 
+2. Add below statement
+e.g. echo "Executing Second Job...."
+3. Similarly add echo statement in FirstJob
+e.g echo "Executing First Job..."
+4. Run/Build the second job and see the error..
+
+5. Follow the similar steps above and delete the build step as Shell from both the jobs
+6  Add build steps as windows batch command in both the jobs and verify again.
+
+
+Installing Plugins and Build Pipeline
+-------------------------------------
+
+1. Dashboard -> Manage Jenkins ->  Plugin
+2. click on available plugin -> Search build pipeline
+3. Select and click on install without restart
+
+Jenkins Pipeline and Jenkinsfile
+--------------------------------
+
+1. Make sure "pipeline" plugin is installed. If not, please install it
+2. Go to new Item -> Enter name - e.g. My Pipeline -> select type pipeline
+3. Go to Pipeline section and add below code
+
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Checkout ....'
+            }
+        }
+        stage('Build') {
+            steps {
+                echo 'Build......'
+            }
+        }
+        stage('Upload...') {
+            steps {
+                echo 'Upload...'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                echo 'Deploy....'
+            }
+        }
+	}
+}
+
+
+4. Run the pipeline
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Simple Checkout Job with Jenkinsfile
+------------------------------------
+
+1. Create New Pipeline e.g. Pipeline2
+2. click on pipeline syntax and select below options
+
+Sample Step - Checkout from version control
+SCM - Git
+Repositories - Enter GIT repo URL
+Credentials - Select Git credentials
+Branches to Build - */main
+Generate the script
+
+4. Click on generate Pipeline script
+5. Copy generated script and add into pipeline script
+e.g. 
+
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Checking out from GIT...'
+                checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'github', url: 'https://github.com/devopscloudworld/demo.git']])
+            }
+        }
+        stage('Build') {
+            steps {
+                echo 'Build......'
+            }
+        }
+        stage('Upload...') {
+            steps {
+                echo 'Upload...'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                echo 'Deploy....'
+            }
+        }
+	}
+}
+
+5. Save and run the job
