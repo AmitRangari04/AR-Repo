@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# example of using arguments to a script
+echo "My first name is Amit"
+echo "My surname is Rangari"
